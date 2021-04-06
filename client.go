@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -95,17 +94,22 @@ func (a *API) Request(method, endpoint string, params interface{}, out interface
 	if err != nil {
 		return BinanceError{Msg: "Invalid JSON"}
 	}
-
 	return nil
 }
 
 //Making a signed request to Binance API server.
 func (a *API) SignedRequest(method, endpoint string, params interface{}, out interface{}) error {
-	u, _ := url.ParseRequestURI(a.URL)
+	u, err := url.ParseRequestURI(a.URL)
+	if err != nil {
+		return err
+	}
 	u.Path = u.Path + endpoint
 
 	//parse params to query string
-	b, _ := json.Marshal(params)
+	b, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
 	m := map[string]interface{}{}
 	json.Unmarshal(b, &m)
 
@@ -126,7 +130,10 @@ func (a *API) SignedRequest(method, endpoint string, params interface{}, out int
 
 	log.Printf("%v %v", method, u.String())
 
-	req, _ := http.NewRequest(method, u.String(), nil)
+	req, err := http.NewRequest(method, u.String(), nil)
+	if err != nil {
+		return err
+	}
 
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("X-MBX-APIKEY", a.Key)
@@ -135,19 +142,19 @@ func (a *API) SignedRequest(method, endpoint string, params interface{}, out int
 
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		type binanceError struct {
-			Code int    `json:"code"`
-			Msg  string `json:"msg"`
-		}
-		e := binanceError{}
+		e := BinanceError{}
 		err = json.NewDecoder(res.Body).Decode(&e)
-		return errors.New(e.Msg)
+		if err != nil {
+			return BinanceError{Msg: err.Error()}
+		}
+		return e
 	}
 	defer res.Body.Close()
-	if out != nil {
-		err = json.NewDecoder(res.Body).Decode(&out)
+	err = json.NewDecoder(res.Body).Decode(&out)
+	if err != nil {
+		return BinanceError{Msg: "Invalid JSON"}
 	}
-	return err
+	return nil
 }
 
 type StreamHandler func(data []byte)
