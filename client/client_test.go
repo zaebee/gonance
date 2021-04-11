@@ -29,13 +29,13 @@ func TestAPI_Request_WhenValid(t *testing.T) {
 			},
 		},
 	}
-	for _, ts := range tests {
-		ts := ts
-		t.Run(ts.desc, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.desc, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Header().Set("Content-Type", "application/json")
-				_, err := io.WriteString(w, ts.response)
+				_, err := io.WriteString(w, tc.response)
 				if err != nil {
 					t.Fatalf("while write response got err: %v", err)
 				}
@@ -47,8 +47,8 @@ func TestAPI_Request_WhenValid(t *testing.T) {
 			got := &out{}
 			err := api.Request("GET", "/api/v1", nil, got)
 
-			if diff := cmp.Diff(got, ts.want); diff != "" || err != nil {
-				t.Errorf("%v.Request(params) got %v want %v", api, got, ts.want)
+			if diff := cmp.Diff(got, tc.want); diff != "" || err != nil {
+				t.Errorf("%v.Request(params) got %v want %v", api, got, tc.want)
 				t.Errorf("%v.Request(params) got err: %v want nil", api, err)
 			}
 		})
@@ -90,13 +90,13 @@ func TestAPI_Request_WhenInvalid(t *testing.T) {
 			},
 		},
 	}
-	for _, ts := range tests {
-		ts := ts
-		t.Run(ts.desc, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.desc, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(ts.status)
+				w.WriteHeader(tc.status)
 				w.Header().Set("Content-Type", "application/json")
-				_, err := io.WriteString(w, ts.response)
+				_, err := io.WriteString(w, tc.response)
 				if err != nil {
 					t.Fatalf("while write response got err: %v", err)
 				}
@@ -107,8 +107,8 @@ func TestAPI_Request_WhenInvalid(t *testing.T) {
 
 			err := api.Request("GET", "/api/v1", nil, &out{})
 
-			if err != ts.want {
-				t.Errorf("%v.Request(params) got err: %v want %v", api, err, ts.want)
+			if err != tc.want {
+				t.Errorf("%v.Request(params) got err: %v want %v", api, err, tc.want)
 			}
 		})
 	}
@@ -130,13 +130,13 @@ func TestAPI_SignedRequest_WhenValid(t *testing.T) {
 			},
 		},
 	}
-	for _, ts := range tests {
-		ts := ts
-		t.Run(ts.desc, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.desc, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Header().Set("Content-Type", "application/json")
-				_, err := io.WriteString(w, ts.response)
+				_, err := io.WriteString(w, tc.response)
 				if err != nil {
 					t.Fatalf("while write response got err: %v", err)
 				}
@@ -148,8 +148,8 @@ func TestAPI_SignedRequest_WhenValid(t *testing.T) {
 			got := &out{}
 			err := api.SignedRequest("GET", "/api/v1", nil, got)
 
-			if diff := cmp.Diff(got, ts.want); diff != "" || err != nil {
-				t.Errorf("%v.Request(params) got %v want %v", api, got, ts.want)
+			if diff := cmp.Diff(got, tc.want); diff != "" || err != nil {
+				t.Errorf("%v.Request(params) got %v want %v", api, got, tc.want)
 				t.Errorf("%v.Request(params) got err: %v want nil", api, err)
 			}
 		})
@@ -191,13 +191,13 @@ func TestAPI_SignedRequest_WhenInvalid(t *testing.T) {
 			},
 		},
 	}
-	for _, ts := range tests {
-		ts := ts
-		t.Run(ts.desc, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.desc, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(ts.status)
+				w.WriteHeader(tc.status)
 				w.Header().Set("Content-Type", "application/json")
-				_, err := io.WriteString(w, ts.response)
+				_, err := io.WriteString(w, tc.response)
 				if err != nil {
 					t.Fatalf("while write response got err: %v", err)
 				}
@@ -208,8 +208,8 @@ func TestAPI_SignedRequest_WhenInvalid(t *testing.T) {
 
 			err := api.SignedRequest("GET", "/api/v1", nil, &out{})
 
-			if err != ts.want {
-				t.Errorf("%v.Request(params) got err: %v want %v", api, err, ts.want)
+			if err != tc.want {
+				t.Errorf("%v.Request(params) got err: %v want %v", api, err, tc.want)
 			}
 		})
 	}

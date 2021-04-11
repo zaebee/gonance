@@ -36,13 +36,13 @@ func TestMarket_Prices_WhenValid(t *testing.T) {
 			},
 		},
 	}
-	for _, ts := range tests {
-		ts := ts
-		t.Run(ts.desc, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.desc, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Header().Set("Content-Type", "application/json")
-				_, err := io.WriteString(w, ts.response)
+				_, err := io.WriteString(w, tc.response)
 				if err != nil {
 					t.Fatalf("while write response got err: %v", err)
 				}
@@ -52,8 +52,8 @@ func TestMarket_Prices_WhenValid(t *testing.T) {
 			market := Client{API: *api}
 			got, err := market.Prices()
 
-			if diff := cmp.Diff(got, ts.want); diff != "" || err != nil {
-				t.Errorf("%v.Prices() got %v want %v", market, got, ts.want)
+			if diff := cmp.Diff(got, tc.want); diff != "" || err != nil {
+				t.Errorf("%v.Prices() got %v want %v", market, got, tc.want)
 				t.Errorf("%v.Prices() got err: %v want nil", market, err)
 			}
 		})
